@@ -32,7 +32,7 @@ setup(
     author_email='senko.rasic@goodcode.io',
     description='Django Query Inspector',
     license='MIT',
-    url='github.com/dobarkod/django-queryinspect',
+    url='https://github.com/dobarkod/django-queryinspect',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
