@@ -21,7 +21,7 @@ class TestCommand(BaseCommand):
 
     def run(self):
         os.chdir('testproject')
-        ret = os.system('python manage.py test testapp')
+        ret = os.system('%s manage.py test testapp' % sys.executable)
         if ret != 0:
             sys.exit(-1)
 
