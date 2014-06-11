@@ -1,9 +1,11 @@
 # Django Query Inspector
 
+[![Build Status](https://travis-ci.org/dobarkod/django-queryinspect.svg?branch=master)](https://travis-ci.org/dobarkod/django-queryinspect?branch=master)
+
 Query Inspector is a Django application providing middleware for inspecting
 and reporting SQL queries executed for each web request.
 
-Works with Django 1.6. and Python 2.7.
+Works with Django (1.4, 1.5, 1.6, 1.7) and Python (2.6, 2.7, 3.3, 3.4).
 
 Example log output:
 
