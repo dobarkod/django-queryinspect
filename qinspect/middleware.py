@@ -20,9 +20,6 @@ cfg = dict(
     roots=getattr(settings, 'QUERY_INSPECT_TRACEBACK_ROOTS', None),
 )
 
-if cfg['roots']:
-    cfg['roots'] = cfg['roots'].split(':')
-
 __all__ = ['QueryInspectMiddleware']
 
 
