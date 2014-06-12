@@ -11,7 +11,7 @@ Example log output:
 
     [SQL] 17 queries (4 duplicates), 34 ms SQL time, 243 ms total request time
 
-The statistics can also be added to reponse headers, for easier debugging
+The statistics can also be added to response headers, for easier debugging
 without looking into the server logs:
 
     X-QueryInspect-Num-SQL-Queries: 17
