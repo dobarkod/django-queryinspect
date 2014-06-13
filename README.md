@@ -99,7 +99,7 @@ file under any of these directories will be included.
 
 ## License
 
-Copyright (C) 2014. Good Code
+Copyright (C) 2014. Good Code and Django Query Inspector contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
