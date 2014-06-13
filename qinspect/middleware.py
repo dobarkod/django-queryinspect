@@ -3,6 +3,7 @@ import collections
 import re
 import time
 import traceback
+import math
 
 from django.conf import settings
 from django.db import connection
@@ -18,6 +19,8 @@ cfg = dict(
     log_queries=getattr(settings, 'QUERY_INSPECT_LOG_QUERIES', False),
     log_tbs=getattr(settings, 'QUERY_INSPECT_LOG_TRACEBACKS', False),
     roots=getattr(settings, 'QUERY_INSPECT_TRACEBACK_ROOTS', None),
+    stddev_limit=getattr(settings, 'QUERY_INSPECT_STANDARD_DEVIATION_LIMIT', None),
+    absolute_limit=getattr(settings, 'QUERY_INSPECT_ABSOLUTE_LIMIT', None),
 )
 
 __all__ = ['QueryInspectMiddleware']
@@ -99,6 +102,7 @@ class QueryInspectMiddleware(object):
 
         request_time = time.time() - self.request_start
         qis = self.get_query_infos(connection.queries[self.conn_queries_len:])
+        qis_len = len(qis)
         sql_time = sum(qi.time for qi in qis)
 
         duplicates = [(qi, num) for qi, num in self.count_duplicates(qis)
@@ -118,10 +122,35 @@ class QueryInspectMiddleware(object):
                     log.warning('Traceback:\n' +
                         ''.join(traceback.format_list(dup_groups[sql][0].tb)))
 
+        if cfg['stddev_limit'] is not None and qis_len > 0:
+            mean = sql_time / qis_len
+            stddev_sum = sum([math.sqrt((qi.time-mean)**2) for qi in qis])
+            stddev = math.sqrt((1.0/(qis_len-1))*(stddev_sum/qis_len))
+
+            query_limit = mean + (stddev * cfg['stddev_limit'])
+
+            for qi in qis:
+                if qi.time > query_limit:
+                    log.warning('[SQL] query execution of %d ms over limit of %d ms (%d dev above mean): %s' % (
+                        qi.time * 1000,
+                        query_limit * 1000,
+                        cfg['stddev_limit'],
+                        qi.sql))
+                    
+        if cfg['absolute_limit'] is not None and qis_len > 0:
+            query_limit = cfg['absolute_limit'] / 1000.0
+
+            for qi in qis:
+                if qi.time > query_limit:
+                    log.warning('[SQL] query execution of %d ms over absolute limit of %d ms: %s' % (
+                        qi.time * 1000,
+                        query_limit * 1000,
+                        qi.sql))
+
         if cfg['log_stats']:
             log.info('[SQL] %d queries (%d duplicates), %d ms SQL time, '
                 '%d ms total request time' % (
-                    len(qis),
+                    qis_len,
                     num_duplicates,
                     sql_time * 1000,
                     request_time * 1000))
