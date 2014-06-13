@@ -19,7 +19,8 @@ cfg = dict(
     log_queries=getattr(settings, 'QUERY_INSPECT_LOG_QUERIES', False),
     log_tbs=getattr(settings, 'QUERY_INSPECT_LOG_TRACEBACKS', False),
     roots=getattr(settings, 'QUERY_INSPECT_TRACEBACK_ROOTS', None),
-    stddev_limit=getattr(settings, 'QUERY_INSPECT_STANDARD_DEVIATION_LIMIT', None),
+    stddev_limit=getattr(settings, 'QUERY_INSPECT_STANDARD_DEVIATION_LIMIT',
+        None),
     absolute_limit=getattr(settings, 'QUERY_INSPECT_ABSOLUTE_LIMIT', None),
 )
 
@@ -89,6 +90,86 @@ class QueryInspectMiddleware(object):
             buf[qi.sql].append(qi)
         return buf
 
+    @classmethod
+    def check_duplicates(cls, infos):
+        duplicates = [(qi, num) for qi, num in cls.count_duplicates(infos)
+            if num > 1]
+        duplicates.reverse()
+        n = 0
+        if len(duplicates) > 0:
+            n = (sum(num for qi, num in duplicates) - len(duplicates))
+
+        dup_groups = cls.group_queries(infos)
+
+        if cfg['log_queries']:
+            for sql, num in duplicates:
+                log.warning('[SQL] repeated query (%dx): %s' % (num, sql))
+                if cfg['log_tbs'] and dup_groups[sql]:
+                    log.warning('Traceback:\n' +
+                        ''.join(traceback.format_list(dup_groups[sql][0].tb)))
+
+        return n
+
+    def check_stddev_limit(cls, infos):
+        total = sum(qi.time for qi in infos)
+        n = len(infos)
+
+        if cfg['stddev_limit'] is None or n == 0:
+            return
+
+        mean = total / n
+        stddev_sum = sum(math.sqrt((qi.time - mean) ** 2) for qi in infos)
+        stddev = math.sqrt((1.0 / (n - 1)) * (stddev_sum / n))
+
+        query_limit = mean + (stddev * cfg['stddev_limit'])
+
+        for qi in infos:
+            if qi.time > query_limit:
+                log.warning('[SQL] query execution of %d ms over limit of '
+                    '%d ms (%d dev above mean): %s' % (
+                        qi.time * 1000,
+                        query_limit * 1000,
+                        cfg['stddev_limit'],
+                        qi.sql))
+
+    @classmethod
+    def check_absolute_limit(cls, infos):
+        n = len(infos)
+        if cfg['absolute_limit'] is None or n == 0:
+            return
+
+        query_limit = cfg['absolute_limit'] / 1000.0
+
+        for qi in infos:
+            if qi.time > query_limit:
+                log.warning('[SQL] query execution of %d ms over absolute '
+                    'limit of %d ms: %s' % (
+                        qi.time * 1000,
+                        query_limit * 1000,
+                        qi.sql))
+
+    @classmethod
+    def output_stats(self, infos, num_duplicates, request_time, response):
+        sql_time = sum(qi.time for qi in infos)
+        n = len(infos)
+
+        if cfg['log_stats']:
+            log.info('[SQL] %d queries (%d duplicates), %d ms SQL time, '
+                '%d ms total request time' % (
+                    n,
+                    num_duplicates,
+                    sql_time * 1000,
+                    request_time * 1000))
+
+        if cfg['header_stats']:
+            response['X-QueryInspect-Num-SQL-Queries'] = str(n)
+            response['X-QueryInspect-Total-SQL-Time'] = '%d ms' % (
+                sql_time * 1000)
+            response['X-QueryInspect-Total-Request-Time'] = '%d ms' % (
+                request_time * 1000)
+            response['X-QueryInspect-Duplicate-SQL-Queries'] = str(
+                num_duplicates)
+
     def process_request(self, request):
         if not cfg['enabled']:
             return
@@ -101,68 +182,14 @@ class QueryInspectMiddleware(object):
             return response
 
         request_time = time.time() - self.request_start
-        qis = self.get_query_infos(connection.queries[self.conn_queries_len:])
-        qis_len = len(qis)
-        sql_time = sum(qi.time for qi in qis)
 
-        duplicates = [(qi, num) for qi, num in self.count_duplicates(qis)
-            if num > 1]
-        duplicates.reverse()
-        num_duplicates = 0
-        if len(duplicates) > 0:
-            num_duplicates = (sum(num for qi, num in duplicates) -
-                len(duplicates))
+        infos = self.get_query_infos(
+            connection.queries[self.conn_queries_len:])
 
-        dup_groups = self.group_queries(qis)
-
-        if cfg['log_queries']:
-            for sql, num in duplicates:
-                log.warning('[SQL] repeated query (%dx): %s' % (num, sql))
-                if cfg['log_tbs'] and dup_groups[sql]:
-                    log.warning('Traceback:\n' +
-                        ''.join(traceback.format_list(dup_groups[sql][0].tb)))
-
-        if cfg['stddev_limit'] is not None and qis_len > 0:
-            mean = sql_time / qis_len
-            stddev_sum = sum([math.sqrt((qi.time-mean)**2) for qi in qis])
-            stddev = math.sqrt((1.0/(qis_len-1))*(stddev_sum/qis_len))
-
-            query_limit = mean + (stddev * cfg['stddev_limit'])
-
-            for qi in qis:
-                if qi.time > query_limit:
-                    log.warning('[SQL] query execution of %d ms over limit of %d ms (%d dev above mean): %s' % (
-                        qi.time * 1000,
-                        query_limit * 1000,
-                        cfg['stddev_limit'],
-                        qi.sql))
-                    
-        if cfg['absolute_limit'] is not None and qis_len > 0:
-            query_limit = cfg['absolute_limit'] / 1000.0
-
-            for qi in qis:
-                if qi.time > query_limit:
-                    log.warning('[SQL] query execution of %d ms over absolute limit of %d ms: %s' % (
-                        qi.time * 1000,
-                        query_limit * 1000,
-                        qi.sql))
-
-        if cfg['log_stats']:
-            log.info('[SQL] %d queries (%d duplicates), %d ms SQL time, '
-                '%d ms total request time' % (
-                    qis_len,
-                    num_duplicates,
-                    sql_time * 1000,
-                    request_time * 1000))
-
-        if cfg['header_stats']:
-            response['X-QueryInspect-Num-SQL-Queries'] = str(len(qis))
-            response['X-QueryInspect-Total-SQL-Time'] = '%d ms' % (
-                sql_time * 1000)
-            response['X-QueryInspect-Total-Request-Time'] = '%d ms' % (
-                request_time * 1000)
-            response['X-QueryInspect-Duplicate-SQL-Queries'] = str(
-                num_duplicates)
+        num_duplicates = self.check_duplicates(infos)
+        self.check_stddev_limit(infos)
+        self.check_absolute_limit(infos)
+        self.output_stats(infos, num_duplicates, request_time, response)
 
         return response
 
