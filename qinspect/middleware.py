@@ -9,8 +9,15 @@ from django.conf import settings
 from django.db import connection
 from django.db.backends.util import CursorDebugWrapper
 
+if hasattr(logging.NullHandler):
+    NullHandler = logging.NullHandler
+else:
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+
 log = logging.getLogger(__name__)
-log.addHandler(logging.NullHandler())
+log.addHandler(NullHandler())
 
 cfg = dict(
     enabled=(settings.DEBUG and
