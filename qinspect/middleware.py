@@ -9,7 +9,8 @@ from django.conf import settings
 from django.db import connection
 from django.db.backends.util import CursorDebugWrapper
 
-log = logging.getLogger('qinspect')
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 cfg = dict(
     enabled=(settings.DEBUG and
