@@ -4,7 +4,7 @@ from .models import Author, Book, Publisher
 from .memorylog import MemoryHandler
 
 
-class TestFoo(TestCase):
+class TestQueryInspect(TestCase):
 
     def test_query_inspect(self):
         self.author = Author.objects.create(name='Author')
@@ -16,7 +16,7 @@ class TestFoo(TestCase):
                 publisher=self.publisher)
 
         with self.settings(DEBUG=True):
-            self.client.get('/authors/')
+            response = self.client.get('/authors/')
 
         log = MemoryHandler.get_log()
         lines = log.split('\n')
@@ -25,12 +25,20 @@ class TestFoo(TestCase):
         has_repeated_query = False
         stats = '[SQL] 12 queries (9 duplicates),'
         has_stats = False
+        boring_traceback_entry = 'django/db/models/query.py'
+        has_boring_traceback_entry = False
+        over_absolute_limit = 'over absolute limit of -1 ms'
+        has_over_absolute_limit = False
 
         for line in lines:
             if line.startswith(repeated_query):
                 has_repeated_query = True
             if line.startswith(stats):
                 has_stats = True
+            if boring_traceback_entry in line:
+                has_boring_traceback_entry = True
+            if over_absolute_limit in line:
+                has_over_absolute_limit = True
 
         self.assertTrue(has_repeated_query,
             msg="Log doesn't have correct repeated query: '" + repeated_query +
@@ -38,3 +46,13 @@ class TestFoo(TestCase):
         self.assertTrue(has_stats,
             msg="Log doesn't have correct stats: '" + stats +
                 '\'\n"""\n' + log + '"""')
+        self.assertFalse(has_boring_traceback_entry,
+            msg='Log contains extraneous traceback entries\n"""\n' +
+                log + '"""')
+        self.assertTrue(has_over_absolute_limit,
+            msg='Log doesn\'t have over absolute limit warning\n"""\n' +
+                log + '"""')
+
+        self.assertEqual(response['X-QueryInspect-Num-SQL-Queries'], '12')
+        self.assertTrue('X-QueryInspect-Total-Request-Time' in response)
+        self.assertEqual(response['X-QueryInspect-Duplicate-SQL-Queries'], '9')
