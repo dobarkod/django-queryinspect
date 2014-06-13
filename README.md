@@ -77,15 +77,17 @@ behaviour:
     # Whether to include tracebacks in the logs (default: False)
     QUERY_INSPECT_LOG_TRACEBACKS = True
     # Project root (one or several colon-separated directories, default empty)
-    QUERY_INSPECT_TRACEBACK_ROOTS = '/path/to/my/django/project/'
+    QUERY_INSPECT_TRACEBACK_ROOTS = ['/path/to/my/django/project/']
 
 ## Traceback roots
 
 Complete tracebacks of an entire request are usually huge, but only a few
 entries in the traceback are of the interest (usually only the few that
-represent the code you're working on). To include only these entries of interest
-in the shown tracebacks, you can set `QUERY_INSPECT_TRACEBACK_ROOTS` to the
-root directory of your project.
+represent the code you're working on). To include only these entries of
+interest in the traceback, you can set `QUERY_INSPECT_TRACEBACK_ROOTS` to a
+list of paths.  If the path for a code file in the traceback begins with any of
+the paths in `QUERY_INSPECT_TRACEBACK_ROOTS`, it will be included in the
+traceback.
 
 Since Django apps need not be under the same directory, the setting also
 accepts colon-separated list of directories - traceback entry referencing any
