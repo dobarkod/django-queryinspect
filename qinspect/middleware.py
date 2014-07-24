@@ -8,6 +8,7 @@ import math
 from django.conf import settings
 from django.db import connection
 from django.db.backends.util import CursorDebugWrapper
+from django.core.exceptions import MiddlewareNotUsed
 
 if hasattr(logging, 'NullHandler'):
     NullHandler = logging.NullHandler
@@ -178,17 +179,15 @@ class QueryInspectMiddleware(object):
             response['X-QueryInspect-Duplicate-SQL-Queries'] = str(
                 num_duplicates)
 
-    def process_request(self, request):
+    def __init__(self):
         if not cfg['enabled']:
-            return
+            raise MiddlewareNotUsed()
 
+    def process_request(self, request):
         self.request_start = time.time()
         self.conn_queries_len = len(connection.queries)
 
     def process_response(self, request, response):
-        if not hasattr(self, 'request_start'):
-            return response
-
         request_time = time.time() - self.request_start
 
         infos = self.get_query_infos(
