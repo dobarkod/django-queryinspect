@@ -1,6 +1,6 @@
 import json
 from django.http import HttpResponse
-from .models import Author
+from .models import Author, Book
 
 
 class JsonResponse(HttpResponse):
@@ -21,3 +21,8 @@ def get_authors_with_books(request):
         authors.append(author)
 
     return JsonResponse(authors)
+
+
+def book(request):
+    book = Book.objects.all()[0]
+    return JsonResponse({'title': book.title})

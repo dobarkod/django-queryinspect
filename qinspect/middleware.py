@@ -128,7 +128,10 @@ class QueryInspectMiddleware(object):
 
         mean = total / n
         stddev_sum = sum(math.sqrt((qi.time - mean) ** 2) for qi in infos)
-        stddev = math.sqrt((1.0 / (n - 1)) * (stddev_sum / n))
+        if n < 2:
+            stddev = 0
+        else:
+            stddev = math.sqrt((1.0 / (n - 1)) * (stddev_sum / n))
 
         query_limit = mean + (stddev * cfg['stddev_limit'])
 
