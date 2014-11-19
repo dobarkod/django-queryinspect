@@ -97,6 +97,19 @@ Since Django apps need not be under the same directory, the setting also
 accepts colon-separated list of directories - traceback entry referencing any
 file under any of these directories will be included.
 
+## Testing
+
+To run tests just use `tox` command (https://pypi.python.org/pypi/tox)
+
+    tox  # for all supported python and django versions
+
+If you need you can run tox just for single environment, f.i.:
+
+    tox -e py27_django17
+
+For available test environments refer to `tox.ini` file.
+
+
 ## License
 
 Copyright (C) 2014. Good Code and Django Query Inspector contributors
