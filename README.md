@@ -63,8 +63,40 @@ it):
 
     DEBUG = True
 
-And set one or more Query Inspector settings flags depending on the desired
-behaviour:
+Update your logging configuration so the output from the queryinspect app
+shows up:
+
+    LOGGING = {
+        ...
+        'handlers': {
+            ...
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+            ...
+        },
+
+        'loggers': {
+            ...
+            'qinspect': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+        },
+        ...
+    }
+
+By default, Query Inspector will log stats for each request via Django
+logging mechanism and via HTTP headers in the response. This default
+behaviour can be modified by specifying several settigns values in your
+Django settings file (see next section)
+
+## Configuration
+
+The behaviour of Query Inspector can be fine-tuned via the following
+settings variables:
 
     # Whether the Query Inspector should do anything (default: False)
     QUERY_INSPECT_ENABLED = True
@@ -80,7 +112,7 @@ behaviour:
     QUERY_INSPECT_STANDARD_DEVIATION_LIMIT = 2
     # Whether to include tracebacks in the logs (default: False)
     QUERY_INSPECT_LOG_TRACEBACKS = True
-    # Project root (one or several colon-separated directories, default empty)
+    # Project root (a list of directories, see below - default empty)
     QUERY_INSPECT_TRACEBACK_ROOTS = ['/path/to/my/django/project/']
 
 ## Traceback roots
@@ -112,7 +144,7 @@ For available test environments refer to `tox.ini` file.
 
 ## License
 
-Copyright (C) 2014. Good Code and Django Query Inspector contributors
+Copyright (C) 2014.-2015. Good Code and Django Query Inspector contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
