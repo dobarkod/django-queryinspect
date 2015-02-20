@@ -7,7 +7,7 @@ import math
 
 from django.conf import settings
 from django.db import connection
-from django.db.backends.util import CursorDebugWrapper
+from django.db.backends.utils import CursorDebugWrapper
 from django.core.exceptions import MiddlewareNotUsed
 
 if hasattr(logging, 'NullHandler'):
