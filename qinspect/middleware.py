@@ -7,8 +7,12 @@ import math
 
 from django.conf import settings
 from django.db import connection
-from django.db.backends.utils import CursorDebugWrapper
 from django.core.exceptions import MiddlewareNotUsed
+
+try:
+    from django.db.backends.utils import CursorDebugWrapper
+except ImportError:
+    from django.db.backends.util import CursorDebugWrapper
 
 if hasattr(logging, 'NullHandler'):
     NullHandler = logging.NullHandler
