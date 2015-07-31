@@ -195,6 +195,9 @@ class QueryInspectMiddleware(object):
         self.conn_queries_len = len(connection.queries)
 
     def process_response(self, request, response):
+        if not hasattr(self, "request_start"):
+            return response
+            
         request_time = time.time() - self.request_start
 
         infos = self.get_query_infos(
