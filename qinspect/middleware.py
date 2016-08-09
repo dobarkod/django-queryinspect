@@ -8,6 +8,13 @@ import math
 from django.conf import settings
 from django.db import connection
 from django.core.exceptions import MiddlewareNotUsed
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    class MiddlewareMixin():
+        def __init__(self, get_response=None):
+            pass
+
 
 try:
     from django.db.backends.utils import CursorDebugWrapper
@@ -40,7 +47,7 @@ cfg = dict(
 __all__ = ['QueryInspectMiddleware']
 
 
-class QueryInspectMiddleware(object):
+class QueryInspectMiddleware(MiddlewareMixin):
 
     class QueryInfo(object):
         __slots__ = ('sql', 'time', 'tb')
@@ -186,9 +193,10 @@ class QueryInspectMiddleware(object):
             response['X-QueryInspect-Duplicate-SQL-Queries'] = str(
                 num_duplicates)
 
-    def __init__(self):
+    def __init__(self, get_response=None):
         if not cfg['enabled']:
             raise MiddlewareNotUsed()
+        super(QueryInspectMiddleware, self).__init__(get_response)
 
     def process_request(self, request):
         self.request_start = time.time()
