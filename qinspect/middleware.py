@@ -11,7 +11,7 @@ from django.core.exceptions import MiddlewareNotUsed
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
-    class MiddlewareMixin():
+    class MiddlewareMixin(object):
         def __init__(self, get_response=None):
             pass
 
