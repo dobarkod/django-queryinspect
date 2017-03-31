@@ -89,6 +89,9 @@ class QueryInspectMiddleware(MiddlewareMixin):
     def get_query_infos(cls, queries):
         retval = []
         for q in queries:
+            if q['sql'] is None:
+                continue
+                
             qi = cls.QueryInfo()
             qi.sql = cls.sql_id_pattern.sub('= ?', q['sql'])
             qi.time = float(q['time'])
