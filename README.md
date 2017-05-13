@@ -5,8 +5,7 @@
 Query Inspector is a Django application providing middleware for inspecting
 and reporting SQL queries executed for each web request.
 
-Works with Django (1.4, 1.5, 1.6, 1.7, 1.8, 1.9) and Python (2.6, 2.7, 3.3,
-3.4, 3.5).
+Works with Django (1.4 and later) and Python (2.6, 2.7, 3.3 and later).
 
 Example log output:
 
@@ -136,16 +135,16 @@ To run tests just use `tox` command (https://pypi.python.org/pypi/tox)
 
     tox  # for all supported python and django versions
 
-If you need you can run tox just for single environment, f.i.:
+If you need you can run tox just for single environment, for instance:
 
-    tox -e py27_django17
+    tox -e py36-django111
 
 For available test environments refer to `tox.ini` file.
 
 
 ## License
 
-Copyright (C) 2014.-2015. Good Code and Django Query Inspector contributors
+Copyright (C) 2014.-2017. Good Code and Django Query Inspector contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

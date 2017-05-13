@@ -1,4 +1,9 @@
 language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
 
 sudo: false
 
@@ -6,35 +11,12 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-addons:
-  apt:
-    sources:
-      - deadsnakes
-    packages:
-      - python3.5
-
 env:
-  - TOX_ENV=py26-django14
-  - TOX_ENV=py26-django15
-  - TOX_ENV=py26-django16
-  - TOX_ENV=py27-django14
-  - TOX_ENV=py27-django15
-  - TOX_ENV=py27-django16
-  - TOX_ENV=py27-django17
-  - TOX_ENV=py27-django18
-  - TOX_ENV=py27-django19
-  - TOX_ENV=py33-django15
-  - TOX_ENV=py33-django16
-  - TOX_ENV=py33-django17
-  - TOX_ENV=py33-django18
-  - TOX_ENV=py34-django15
-  - TOX_ENV=py34-django16
-  - TOX_ENV=py34-django17
-  - TOX_ENV=py34-django18
-  - TOX_ENV=py34-django19
-  - TOX_ENV=py35-django18
-  - TOX_ENV=py35-django19
+  - DJANGO=1.8.18
+  - DJANGO=1.9.13
+  - DJANGO=1.10.7
+  - DJANGO=1.11.1
 
 script:
-  - pip install tox
-  - tox -e $TOX_ENV
+  - pip install Django==$DJANGO
+  - python setup.py test
