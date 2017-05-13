@@ -27,14 +27,14 @@ class TestCommand(BaseCommand):
 
 setup(
     name='django-queryinspect',
-    version='0.1.0',
+    version='1.0.0',
     author='Senko Rasic',
     author_email='senko.rasic@goodcode.io',
     description='Django Query Inspector',
     license='MIT',
     url='https://github.com/dobarkod/django-queryinspect',
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",
