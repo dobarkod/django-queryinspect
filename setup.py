@@ -27,7 +27,7 @@ class TestCommand(BaseCommand):
 
 setup(
     name='django-queryinspect',
-    version='1.0.0',
+    version='1.1.0',
     author='Senko Rasic',
     author_email='senko.rasic@goodcode.io',
     description='Django Query Inspector',
@@ -44,7 +44,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     packages=find_packages(),
-    install_requires=['Django>=1.4'],
+    install_requires=['Django>=1.11'],
     cmdclass={
         'test': TestCommand,
     }

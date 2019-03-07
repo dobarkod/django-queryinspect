@@ -5,7 +5,7 @@
 Query Inspector is a Django application providing middleware for inspecting
 and reporting SQL queries executed for each web request.
 
-Works with Django (1.4 and later) and Python (2.6, 2.7, 3.3 and later).
+Works with Django (1.11 and later) and Python (2.7, 3.5 and later).
 
 Example log output:
 
