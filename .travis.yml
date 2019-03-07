@@ -16,11 +16,12 @@ env:
   - DJANGO=2.0.13
   - DJANGO=2.1.7
 
-exclude:
-  - python: 2.7
-    env: DJANGO=2.0.13
-  - python: 2.7
-    env: DJANGO=2.1.7
+matrix:
+  exclude:
+    - python: 2.7
+      env: DJANGO=2.0.13
+    - python: 2.7
+      env: DJANGO=2.1.7
 
 script:
   - pip install Django==$DJANGO
