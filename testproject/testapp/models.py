@@ -10,6 +10,6 @@ class Publisher(models.Model):
 
 
 class Book(models.Model):
-    author = models.ForeignKey(Author, related_name='books', on_delete=models.CASCADE)
-    publisher = models.ForeignKey(Publisher, related_name='books', on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE, related_name='books')
     title = models.CharField(max_length=200)
