@@ -114,6 +114,8 @@ settings variables:
     QUERY_INSPECT_LOG_TRACEBACKS = True
     # Project root (a list of directories, see below - default empty)
     QUERY_INSPECT_TRACEBACK_ROOTS = ['/path/to/my/django/project/']
+    # Minimum number of duplicates needed to log the query (default: 2)
+    QUERY_INSPECT_DUPLICATE_MIN = 1 # to force logging of all queries
 
 ## Traceback roots
 
