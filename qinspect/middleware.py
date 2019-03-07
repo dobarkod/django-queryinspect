@@ -2,6 +2,7 @@ import logging
 import collections
 import re
 import time
+import threading
 import traceback
 import math
 
@@ -45,6 +46,8 @@ cfg = dict(
 )
 
 __all__ = ['QueryInspectMiddleware']
+
+_local = threading.local()
 
 
 class QueryInspectMiddleware(MiddlewareMixin):
@@ -202,17 +205,17 @@ class QueryInspectMiddleware(MiddlewareMixin):
         super(QueryInspectMiddleware, self).__init__(get_response)
 
     def process_request(self, request):
-        self.request_start = time.time()
-        self.conn_queries_len = len(connection.queries)
+        _local.request_start = time.time()
+        _local.conn_queries_len = len(connection.queries)
 
     def process_response(self, request, response):
-        if not hasattr(self, "request_start"):
+        if not hasattr(_local, "request_start"):
             return response
-            
-        request_time = time.time() - self.request_start
+
+        request_time = time.time() - _local.request_start
 
         infos = self.get_query_infos(
-            connection.queries[self.conn_queries_len:])
+            connection.queries[_local.conn_queries_len:])
 
         num_duplicates = self.check_duplicates(infos)
         self.check_stddev_limit(infos)
