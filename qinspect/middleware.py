@@ -39,6 +39,7 @@ cfg = dict(
     header_stats=getattr(settings, 'QUERY_INSPECT_HEADER_STATS', True),
     log_queries=getattr(settings, 'QUERY_INSPECT_LOG_QUERIES', False),
     log_tbs=getattr(settings, 'QUERY_INSPECT_LOG_TRACEBACKS', False),
+    duplicate_min=getattr(settings, 'QUERY_INSPECT_DUPLICATE_MIN', 1),
     roots=getattr(settings, 'QUERY_INSPECT_TRACEBACK_ROOTS', None),
     stddev_limit=getattr(settings, 'QUERY_INSPECT_STANDARD_DEVIATION_LIMIT',
         None),
@@ -119,7 +120,7 @@ class QueryInspectMiddleware(MiddlewareMixin):
     @classmethod
     def check_duplicates(cls, infos):
         duplicates = [(qi, num) for qi, num in cls.count_duplicates(infos)
-            if num > 1]
+            if num > cfg['duplicate_min']]
         duplicates.reverse()
         n = 0
         if len(duplicates) > 0:
