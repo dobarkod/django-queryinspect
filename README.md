@@ -54,9 +54,11 @@ Install from the Python Package Index:
 
 Add the middleware to your Django settings:
 
-    MIDDLEWARE_CLASSES += (
+    MIDDLEWARE += (
         'qinspect.middleware.QueryInspectMiddleware',
     )
+
+(If you're using Django 1.x, the setting name is `MIDDLEWARE_CLASSES`).
 
 Enable Django's `DEBUG` setting (the SQL query logging doesn't work without
 it):
