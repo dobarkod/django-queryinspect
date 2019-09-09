@@ -1,7 +1,5 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
   - "3.7"
 
 sudo: false
@@ -11,9 +9,9 @@ cache:
     - $HOME/.cache/pip
 
 env:
-  - DJANGO=1.11.20
-  - DJANGO=2.0.13
-  - DJANGO=2.1.7
+  - DJANGO=1.11.24
+  - DJANGO=2.1.12
+  - DJANGO=2.2.5
 
 script:
   - pip install Django==$DJANGO
