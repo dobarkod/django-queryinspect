@@ -44,6 +44,7 @@ cfg = dict(
     stddev_limit=getattr(settings, 'QUERY_INSPECT_STANDARD_DEVIATION_LIMIT',
         None),
     absolute_limit=getattr(settings, 'QUERY_INSPECT_ABSOLUTE_LIMIT', None),
+    sql_log_limit=getattr(settings, 'QUERY_INSPECT_SQL_LOG_LIMIT', None),
 )
 
 __all__ = ['QueryInspectMiddleware']
@@ -132,7 +133,7 @@ class QueryInspectMiddleware(MiddlewareMixin):
 
         if cfg['log_queries']:
             for sql, num in duplicates:
-                log.warning('[SQL] repeated query (%dx): %s' % (num, sql))
+                log.warning('[SQL] repeated query (%dx): %s' % (num, cls.truncate_sql(sql)))
                 if cfg['log_tbs'] and dup_groups[sql]:
                     log.warning('Traceback:\n' +
                         ''.join(traceback.format_list(dup_groups[sql][0].tb)))
@@ -162,7 +163,7 @@ class QueryInspectMiddleware(MiddlewareMixin):
                         qi.time * 1000,
                         query_limit * 1000,
                         cfg['stddev_limit'],
-                        qi.sql))
+                        cls.truncate_sql(qi.sql)))
 
     @classmethod
     def check_absolute_limit(cls, infos):
@@ -178,7 +179,15 @@ class QueryInspectMiddleware(MiddlewareMixin):
                     'limit of %d ms: %s' % (
                         qi.time * 1000,
                         query_limit * 1000,
-                        qi.sql))
+                        cls.truncate_sql(qi.sql)))
+
+    @staticmethod
+    def truncate_sql(sql):
+        limit = cfg['sql_log_limit']
+        if limit and len(sql) > limit:
+            n = (limit - 5) // 2
+            sql = sql[:n] + ' ... ' + sql[-n:]
+        return sql
 
     @classmethod
     def output_stats(self, infos, num_duplicates, request_time, response):

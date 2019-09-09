@@ -102,3 +102,20 @@ class TestQueryInspect(TestCase):
         self.assertEqual(response['X-QueryInspect-Num-SQL-Queries'], '12')
         self.assertTrue('X-QueryInspect-Total-Request-Time' in response)
         self.assertEqual(response['X-QueryInspect-Duplicate-SQL-Queries'], '9')
+
+    def test_sql_truncate(self):
+        self.author = Author.objects.create(name='Author')
+
+        with self.settings(DEBUG=True):
+            response = self.client.get('/authors/')
+
+        log = MemoryHandler.get_log()
+        lines = log.split('\n')
+
+        has_truncated = False
+        for line in lines:
+            if 'SELECT "testapp_book"' in line and ' ... ' in line:
+                has_truncated = True
+                break
+
+        self.assertTrue(has_truncated, msg='Log didn\'t truncate SQL output')
