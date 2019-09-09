@@ -225,6 +225,8 @@ class QueryInspectMiddleware(MiddlewareMixin):
         self.check_absolute_limit(infos)
         self.output_stats(infos, num_duplicates, request_time, response)
 
+        del _local.request_start
+        del _local.conn_queries_len
         return response
 
 
